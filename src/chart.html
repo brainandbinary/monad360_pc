@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+    <style>
+        .logo.vanilla:hover {
+            filter: drop-shadow(0 0 2em #ffe21c);
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <button id="ol" class="tab tab-selected">Over all</button>
+        <button id="gp" class="tab">Grouped</button>
+
+    </div>
+    <div id="radio_check" style="display: inline-block; font-size: 0.9em; margin-top: 20px; margin-left: 5px;">
+        <label style="margin-right: 10px;">All
+            <input id="on110" type="radio" checked="checked" name="radio">
+        </label>
+        <label>Last twenty
+            <input id="on20" type="radio" name="radio">
+        </label>
+    </div>
+
+    <div class="container">
+        <div>
+            Average score: <span id="av-scr"></span>
+        </div>
+        <div>
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+
+            const { invoke } = window.__TAURI__.tauri;
+            async function getScores() {
+                return await invoke("get_scores", { isVerbal: true });
+            }
+
+            async function get_verbal_anas_list(limit) {
+                return await invoke("get_verbal_anas", { limit: limit });
+            }
+
+
+
+
+            const ctx = document.getElementById('myChart');
+
+            let charObj = null;
+
+
+            function makeChart(type, data, Yscale) {
+                /* destry old chart */
+                if (charObj != null) {
+                    charObj.destroy();
+                }
+                charObj = new Chart(ctx, {
+                    type: type,
+                    data: data,
+                    options: {
+                        scales: {
+                            y: Yscale
+                        }
+                    }
+                });
+            }
+
+            function activateTab(idStr) {
+
+
+                let tbs = document.getElementsByClassName("tab");
+
+                [].slice.call(tbs)
+                    .forEach(element => {
+                        element.classList.remove("tab-selected");
+                    });
+
+                let x = document.getElementById(idStr);
+                x.classList.add("tab-selected");
+
+
+            }
+
+            function avarageScore(avr) {
+                document.getElementById("av-scr").innerText = avr;
+            }
+
+
+
+
+
+            /* over all func */
+            function overall() {
+                
+
+                getScores().then(function (e) {
+
+                    let Yscale = {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        },
+                        min: 130,
+                        max: 170,
+                        ticks: {
+                            // forces step size to be 50 units
+                            stepSize: 1
+                        }
+                    }
+                    var dt = e.map(e => e[1]);
+                    var data = {
+                        labels: Array.from({ length: 110 }, (_, i) => i + 1),
+                        datasets: [
+                            {
+                                label: 'Test',
+                                data: dt,
+                                pointStyle: 'circle',
+                                pointRadius: 5,
+                                pointHoverRadius: 15
+                            }
+                        ]
+                    };;
+                    var ln = dt.length;
+                    console.log(ln)
+                    console.log(dt.reduce((accumulator, currentValue) => accumulator + currentValue))
+                    var avr = dt.reduce((accumulator, currentValue) => accumulator + currentValue) / ln;
+                    avarageScore(avr);
+                    makeChart("line", data, Yscale);
+
+                });
+
+            }
+
+            function group_chart(lenght) {
+
+               
+
+                get_verbal_anas_list(lenght).then(function (e) {
+
+
+                    let tc_list = e.map(function (q) {
+                        return q.tcCorrect;
+                    });
+                    let rc_list = e.map(function (q) {
+                        return q.rcCorrect;
+                    });
+                    let sc_list = e.map(function (q) {
+                        return q.scCorrect;
+                    });
+
+                    var data = {
+                        labels: Array.from({ length: lenght }, (_, i) => i + 1),
+                        datasets: [{
+                            label: "TC",
+                            backgroundColor: "#3080d0",
+                            data: tc_list,
+                            pointStyle: 'circle',
+                            borderColor: "#3080d0",
+                            pointRadius: 5,
+                            pointHoverRadius: 15
+                        }, {
+                            label: "RC",
+                            backgroundColor: "#ff6384",
+                            data: rc_list,
+                            pointStyle: 'circle',
+                            borderColor: "#ff6384",
+                            pointRadius: 5,
+                            pointHoverRadius: 15
+                        }, {
+                            label: "SC",
+                            backgroundColor: "#75bf78",
+                            data: sc_list,
+                            pointStyle: 'circle',
+                            borderColor: "#75bf78",
+                            pointRadius: 5,
+                            pointHoverRadius: 15
+                        }]
+                    };
+
+
+                    let Yscale = {
+                    };
+
+                    makeChart("line", data, Yscale);
+
+                });
+
+
+
+            }
+
+            function re_build_radio(){
+                document.getElementById('radio_check').innerHTML="";
+                document.getElementById('radio_check').innerHTML=
+                    `<label style="margin-right: 10px;">All
+                        <input id="on110" type="radio" checked="checked" name="radio">
+                     </label>
+                    <label>Last twenty
+                        <input id="on20" type="radio" name="radio">
+                    </label>`
+                ;
+            }
+
+            /* Over all */
+
+            document.getElementById('ol').addEventListener("click", function () {
+                activateTab('ol');
+                re_build_radio();
+
+                overall();
+
+            })
+
+
+            /* Grouped */
+
+            document.getElementById('gp').addEventListener("click", function () {
+                activateTab('gp');
+                
+                re_build_radio();
+
+                group_chart(110);
+
+                document.getElementById('on20').addEventListener("click", function () {
+
+                    group_chart(20);
+
+                })
+                document.getElementById('on110').addEventListener("click", function () {
+
+                    group_chart(110);
+
+                })
+
+            })
+
+
+
+
+
+
+            /* on start up */
+            overall();
+
+
+
+        </script>
+
+    </div>
+</body>
+
+</html>

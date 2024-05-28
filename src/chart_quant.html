@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+    <style>
+        .logo.vanilla:hover {
+            filter: drop-shadow(0 0 2em #ffe21c);
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <button id="ol" class="tab tab-selected" onclick="openCity('London')">Over all</button>
+        <button id="tc" class="tab" onclick="openCity('Paris')">Area wise</button>
+    </div>
+    <div style="display: inline-block; font-size: 0.9em; margin-top: 20px; margin-left: 5px;">
+        <label style="margin-right: 10px;">All
+            <input type="radio" checked="checked" name="radio">
+        </label>
+        <label>Last twenty
+            <input type="radio" name="radio">
+        </label>
+    </div>
+    <div class="container">
+        <div>
+            Average score: <span id="av-scr"></span>
+        </div>
+        <div>
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+
+            const { invoke } = window.__TAURI__.tauri;
+            async function getScores() {
+                return await invoke("get_scores", {isVerbal:false});
+            }
+
+
+
+
+            const ctx = document.getElementById('myChart');
+
+            let charObj = null;
+
+
+            function makeChart(type, datasets, Yscale) {
+                charObj = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [...Array(100).keys()],
+                        datasets: [{
+                            label: 'Score',
+                            data: datasets,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: Yscale
+                        }
+                    }
+                });
+            }
+
+            function activateTab(idStr) {
+                /* destry old chart */
+                if (charObj != null) {
+                    charObj.destroy();
+                }
+
+                let tbs = document.getElementsByClassName("tab");
+
+                [].slice.call(tbs)
+                    .forEach(element => {
+                        element.classList.remove("tab-selected");
+                    });
+
+                let x = document.getElementById(idStr);
+                x.classList.add("tab-selected");
+
+
+            }
+
+            function avarageScore(avr) {
+                document.getElementById("av-scr").innerText = avr;
+            }
+
+            document.getElementById('ol').addEventListener("click", function () {
+                activateTab('ol');
+
+
+
+                getScores().then(function (e) {
+
+                    let Yscale = {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        },
+                        min: 130,
+                        max: 170,
+                        ticks: {
+                            // forces step size to be 50 units
+                            stepSize: 1
+                        }
+                    }
+                    var dt = e.map(e => e[1]);
+                    var ln = dt.length;
+                    console.log(ln)
+                    console.log(dt.reduce((accumulator, currentValue) => accumulator + currentValue))
+                    var avr = dt.reduce((accumulator, currentValue) => accumulator + currentValue) / ln;
+                    avarageScore(avr);
+                    makeChart("line", dt, Yscale);
+
+                });
+
+
+            })
+
+            document.getElementById('tc').addEventListener("click", function () {
+                activateTab('tc');
+                avarageScore();
+                let datasets = [...Array(100)].map(function () {
+                    min = Math.ceil(1);
+                    max = Math.floor(3);
+                    return Math.floor(Math.random() * (max - min + 1)) + min;
+                });
+
+                let Yscale = {
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    },
+                    min: 0,
+                    max: 3,
+                    ticks: {
+                        // forces step size to be 50 units
+                        stepSize: 1
+                    }
+                }
+
+                makeChart("line", datasets, Yscale);
+            })
+
+          
+          
+
+
+            /* on start up */
+            getScores().then(function (e) {
+                activateTab('ol');
+                let Yscale = {
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    },
+                    min: 130,
+                    max: 170,
+                    ticks: {
+                        // forces step size to be 50 units
+                        stepSize: 1
+                    }
+                }
+                var dt = e.map(e => e[1]);
+                var ln = dt.length;
+                console.log(ln)
+                console.log(dt.reduce((accumulator, currentValue) => accumulator + currentValue))
+                var avr = dt.reduce((accumulator, currentValue) => accumulator + currentValue) / ln;
+                avarageScore(avr);
+                makeChart("line", dt, Yscale);
+
+            });
+
+
+
+        </script>
+
+    </div>
+</body>
+
+</html>
