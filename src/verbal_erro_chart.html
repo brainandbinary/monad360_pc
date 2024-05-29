@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+    <style>
+        .logo.vanilla:hover {
+            filter: drop-shadow(0 0 2em #ffe21c);
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <button id="ol" class="tab">Accumulated</button>
+        <button id="ent" class="tab">Entry</button>
+
+    </div>
+    <div id="radio_check" style="display: inline-block; font-size: 0.9em; margin-top: 20px; margin-left: 5px;">
+        <label style="margin-right: 10px;">All
+            <input id="on110" type="radio" checked="checked" name="radio">
+        </label>
+        <label>Last twenty
+            <input id="on20" type="radio" name="radio">
+        </label>
+    </div>
+
+    <div class="container">
+
+        <div>
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <div id="entry">
+            <div>
+                <label style="font-size: 10px;" for="nuc">Not use crossing:</label><br>
+                <input type="number" id="nuc" name="nuc" value=0><br>
+                <label style="font-size: 10px;" for="ii">Idea issue:</label><br>
+                <input type="number" id="ii" name="ii" value=0><br>
+                <label style="font-size: 10px;" for="spr">Slow passage read:</label><br>
+                <input type="number" id="spr" name="spr" value=0><br>
+                <label style="font-size: 10px;" for="ppnc">Passage option not cross-checked:</label><br>
+                <input type="number" id="ppnc" name="ppnc" value=0><br>
+                 <label style="font-size: 10px;" for="tkq">Time killing on a question:</label><br>
+                <input type="number" id="tkq" name="tkq" value=0><br>
+                <button id="enter">Enter</button>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+
+            const { invoke } = window.__TAURI__.tauri;
+            async function get_errors() {
+                return await invoke("get_verbal_errors", { limit: 20 });
+            }
+
+            
+            let examId="sss";
+
+
+
+
+            const ctx = document.getElementById('myChart');
+
+            let charObj = null;
+
+
+            function makeChart(type, data, Yscale) {
+                /* destry old chart */
+                if (charObj != null) {
+                    charObj.destroy();
+                }
+                charObj = new Chart(ctx, {
+                    type: type,
+                    data: data,
+                    options: {
+                        scales: {
+                            y: Yscale
+                        },
+                        responsive: true
+                    }
+                });
+            }
+
+            function activateTab(idStr) {
+
+
+                let tbs = document.getElementsByClassName("tab");
+
+                [].slice.call(tbs)
+                    .forEach(element => {
+                        element.classList.remove("tab-selected");
+                    });
+
+                let x = document.getElementById(idStr);
+                x.classList.add("tab-selected");
+
+
+            }
+
+
+
+
+
+
+            /* over all func */
+            function overall() {
+                activateTab('ol');
+                document.getElementById('myChart').style.display="block";
+                document.getElementById('entry').style.display="none";
+
+                get_errors().then(function (e) {
+
+                    let Yscale = {
+
+                    }
+                    console.log(e);
+                    const data = {
+                        labels: [
+                            'Not use crossing',
+                            'Idea issue',
+                            'Slow passage read',
+                            'Passage option not cross-checked',
+                            'Time killing on a question',
+                        ],
+                        datasets: [{
+                            label: 'Verbal errors',
+                            data: [300, 50, 100, 120, 100],
+                            backgroundColor: [
+                                'rgb(255, 99, 132)',
+                                'rgb(54, 162, 235)',
+                                'rgb(162, 205, 54)',
+                                'rgb(132, 205, 86)',
+                                'rgb(54, 99, 86)',
+                            ],
+                            hoverOffset: 4
+                        }]
+                    };
+
+                    makeChart("pie", data, Yscale);
+
+                });
+
+            }
+
+
+            function re_build_radio() {
+                document.getElementById('radio_check').innerHTML = "";
+                document.getElementById('radio_check').innerHTML =
+                    `<label style="margin-right: 10px;">All
+                        <input id="on110" type="radio" checked="checked" name="radio">
+                     </label>
+                    <label>Last twenty
+                        <input id="on20" type="radio" name="radio">
+                    </label>`
+                    ;
+            }
+
+            /* Over all */
+
+            document.getElementById('ol').addEventListener("click", function () {
+                activateTab('ol');
+                re_build_radio();
+
+                overall();
+
+            });
+
+
+            /* form */
+            document.getElementById('enter').addEventListener("click", function () {
+                if(examId!==null){
+                    let not_cross = Math.abs(parseInt(document.getElementById('nuc').value));
+                    let idea_issue = Math.abs(parseInt(document.getElementById('ii').value));
+                    let slow_passage= Math.abs(parseInt(document.getElementById('spr').value));
+                    let passage_option_check= Math.abs(parseInt(document.getElementById('ppnc').value));
+                    let over_time = Math.abs(parseInt(document.getElementById('tkq').value));
+
+                    let error_obj={
+                        not_cross:not_cross,
+                        idea_issue:idea_issue,
+                        slow_passage:slow_passage,
+                        passage_option_check:passage_option_check,
+                        over_time:over_time
+                    };
+
+                    console.log(error_obj)
+
+                }
+              
+                activateTab('ol');
+                re_build_radio();
+
+               
+
+            });
+
+            document.getElementById('ent').addEventListener("click", function () {
+                activateTab('ent');
+                re_build_radio();
+                document.getElementById('myChart').style.display="none";
+                document.getElementById('entry').style.display="block";
+
+
+                /* get examId */
+
+            });
+
+
+
+            /* on start up */
+            overall();
+
+
+
+        </script>
+
+    </div>
+</body>
+
+</html>

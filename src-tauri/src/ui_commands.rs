@@ -1,5 +1,5 @@
 use crate::db::DBError;
-use crate::queries::{self, QuantAna, Score, VerbalAna};
+use crate::queries::{self, QuantAna, Score, VerbalAna, VerbalErrors};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -81,3 +81,13 @@ pub fn get_verbal_anas(limit:i32) -> Result<Vec<VerbalAna>, String> {
         Ok(r) => Ok(r)
     }
 }
+
+
+#[tauri::command]
+pub fn get_verbal_errors(limit:i32) -> Result<(Vec<VerbalErrors>,Option<String>), String> {
+    match  queries::get_verbal_erros(&limit) {
+        Err(e) => Err(e.to_string()),
+        Ok(r) => Ok(r)
+    }
+}
+
