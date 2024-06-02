@@ -60,15 +60,18 @@
                 return await invoke("get_verbal_errors", { limit: 20 });
             }
 
-            
-            let examId="sss";
+            async function insert_or_update_verbal_errors(obj) {
+                return await invoke("insert_or_update_verbal_errors", { verbalError: obj });
+            }
 
-
+        
 
 
             const ctx = document.getElementById('myChart');
 
             let charObj = null;
+
+            let exam_id=null;
 
 
             function makeChart(type, data, Yscale) {
@@ -117,10 +120,20 @@
 
                 get_errors().then(function (e) {
 
+                    exam_id = e[1];
+
                     let Yscale = {
 
                     }
+
+                    let not_crossed = e[0].reduce((acc, ele)=> {return ele.not_crossed+acc},0)
+                    let idea_issue = e[0].reduce((acc, ele)=> {return ele.idea_issue+acc},0)
+                    let slow_passage = e[0].reduce((acc, ele)=> {return ele.slow_passage+acc},0)
+                    let passage_check = e[0].reduce((acc, ele)=> {return ele.passage_check+acc},0)
+                    let time_killing = e[0].reduce((acc, ele)=> {return ele.time_killing+acc},0)
+                   
                     console.log(e);
+                    
                     const data = {
                         labels: [
                             'Not use crossing',
@@ -131,7 +144,7 @@
                         ],
                         datasets: [{
                             label: 'Verbal errors',
-                            data: [300, 50, 100, 120, 100],
+                            data: [not_crossed, idea_issue, slow_passage, passage_check, time_killing],
                             backgroundColor: [
                                 'rgb(255, 99, 132)',
                                 'rgb(54, 162, 235)',
@@ -175,7 +188,7 @@
 
             /* form */
             document.getElementById('enter').addEventListener("click", function () {
-                if(examId!==null){
+                if(exam_id!==null){
                     let not_cross = Math.abs(parseInt(document.getElementById('nuc').value));
                     let idea_issue = Math.abs(parseInt(document.getElementById('ii').value));
                     let slow_passage= Math.abs(parseInt(document.getElementById('spr').value));
@@ -183,19 +196,26 @@
                     let over_time = Math.abs(parseInt(document.getElementById('tkq').value));
 
                     let error_obj={
-                        not_cross:not_cross,
+                        exam_id: exam_id,
+                        not_crossed:not_cross,
                         idea_issue:idea_issue,
                         slow_passage:slow_passage,
-                        passage_option_check:passage_option_check,
-                        over_time:over_time
+                        passage_check:passage_option_check,
+                        time_killing:over_time
                     };
 
                     console.log(error_obj)
 
+                    insert_or_update_verbal_errors(error_obj).then(function(e){
+                        if(e=="200"){
+                            console.log("Inserted or updated");
+                            document.getElementById("entry").innerHTML="Done!!";
+                        }
+                    })
+
                 }
               
-                activateTab('ol');
-                re_build_radio();
+                
 
                
 
@@ -205,7 +225,9 @@
                 activateTab('ent');
                 re_build_radio();
                 document.getElementById('myChart').style.display="none";
-                document.getElementById('entry').style.display="block";
+                if(exam_id!==null){
+                    document.getElementById('entry').style.display="block";
+                }
 
 
                 /* get examId */

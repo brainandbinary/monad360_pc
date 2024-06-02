@@ -37,8 +37,9 @@ pub struct QuantAna {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct VerbalErrors {
+pub struct VerbalError {
     pub id: Option<i32>,
+    pub exam_id: String,
     pub not_crossed: i32,
     pub idea_issue: i32,
     pub slow_passage: i32, 
@@ -81,9 +82,11 @@ pub fn create_verbal_error_table() {
     let con = DB.lock().unwrap();
 
     let res = con.as_ref().unwrap().connection.execute(
-        "CREATE TABLE IF NOT EXISTS verbal_error (id INTEGER PRIMARY KEY, not_crossed INTEGER , idea_issue INTEGER, slow_passage INTEGER, passage_check INTEGER, time_killing INTEGER);",
+        "CREATE TABLE IF NOT EXISTS verbal_error (id INTEGER PRIMARY KEY, exam_id TEXT NOT NULL, not_crossed INTEGER , idea_issue INTEGER, slow_passage INTEGER, passage_check INTEGER, time_killing INTEGER);",
         [],
     );
+
+    
 
     match res {
         Ok(_) => println!("verbal_error Table created successfully"),
@@ -108,6 +111,27 @@ pub fn insert_score(scr: &Score) -> Result<(), DBError> {
             *exam_id_locked = Some(scr.examId.clone());
 
             println!("mock_score inserted {} row(s)", count)
+        }
+        Err(e) => eprintln!("Error inserting row: {}", e),
+    }
+
+    Ok(())
+}
+
+pub fn insert_verbal_error(scr: &VerbalError) -> Result<(), DBError> {
+    let db = DB.lock().unwrap();
+
+    let ch = db.as_ref().unwrap();
+
+    let res: Result<usize, rusqlite::Error> = ch.connection.execute(
+        "INSERT INTO verbal_error (exam_id, not_crossed, idea_issue, slow_passage, passage_check, time_killing ) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        params![ &scr.exam_id, &scr.not_crossed,&scr.idea_issue, &scr.slow_passage, &scr.passage_check, &scr.time_killing ],
+    );
+
+    match res {
+        Ok(count) => {
+        
+            println!("verbal_error inserted {} row(s)", count)
         }
         Err(e) => eprintln!("Error inserting row: {}", e),
     }
@@ -143,6 +167,9 @@ pub fn update_score(score: &i32, exam_id: &String) -> Result<(), DBError> {
         params![score, exam_id],
     );
 
+    let mut exam_id_locked = EXAM_ID.lock().unwrap();
+            *exam_id_locked = Some(exam_id.clone());
+
     match res {
         Ok(count) => println!("mock_score total Updated {}", count),
         Err(e) => eprintln!("Error inserting row: {}", e),
@@ -169,15 +196,30 @@ pub fn update_verbal_ana(scr: &VerbalAna) -> Result<(), DBError> {
     Ok(())
 }
 
+pub fn update_verbal_error(scr: &VerbalError) -> Result<(), DBError> {
+    let db = DB.lock().unwrap();
+
+    let ch = db.as_ref().unwrap();
+
+    let res: Result<usize, rusqlite::Error> = ch.connection.execute(
+        "UPDATE verbal_error SET not_crossed=?1, idea_issue=?2, slow_passage=?3, passage_check=?4, time_killing=?5 WHERE exam_id = ?6",
+        params![scr.not_crossed, scr.idea_issue, scr.slow_passage, scr.passage_check, scr.time_killing, scr.exam_id],
+    );
+
+    match res {
+        Ok(count) => println!("Verbal error total Updated {}", count),
+        Err(e) => eprintln!("Error inserting row: {}", e),
+    }
+
+    Ok(())
+}
+
+
 pub fn get_scores(is_verbal: bool) -> Result<Vec<(i32, i32)>, DBError> {
     let db = DB.lock().unwrap();
 
     let ch = db.as_ref().unwrap();
 
-
-    let mut exam_id_locked = EXAM_ID.lock().unwrap();
-    
-    *exam_id_locked = Some(Uuid::new_v4().to_string());
 
     let mut stmt = ch
         .connection
@@ -195,6 +237,8 @@ pub fn get_scores(is_verbal: bool) -> Result<Vec<(i32, i32)>, DBError> {
                 })
             });
 
+            
+           
             match x {
                 Ok(rs) => {
                     let z: Vec<(i32, i32)> = rs
@@ -312,7 +356,7 @@ pub fn get_scores_structs() -> Result<Vec<Score>, DBError> {
 }
 
 
-pub fn get_verbal_erros(limit: &i32) -> Result<(Vec<VerbalErrors>,Option<String>), DBError> {
+pub fn get_verbal_erros(limit: &i32) -> Result<(Vec<VerbalError>,Option<String>), DBError> {
     let db = DB.lock().unwrap();
 
     let ch = db.as_ref().unwrap();
@@ -321,23 +365,24 @@ pub fn get_verbal_erros(limit: &i32) -> Result<(Vec<VerbalErrors>,Option<String>
         .connection
         .prepare("select * from verbal_error order by id desc limit ?1;");
 
-    let res: Result<(Vec<VerbalErrors>,Option<String>), _> = match stmt {
+    let res: Result<(Vec<VerbalError>,Option<String>), _> = match stmt {
         Ok(mut st) => {
             let x = st.query_map([limit], |row| {
-                Ok(VerbalErrors {
+                Ok(VerbalError {
                     id: row.get(0)?,
-                    not_crossed: row.get(1)?,
-                    idea_issue: row.get(2)?,
-                    slow_passage: row.get(3)?,
-                    passage_check: row.get(4)?,
-                    time_killing: row.get(5)?,
+                    exam_id: row.get(1)?,
+                    not_crossed: row.get(2)?,
+                    idea_issue: row.get(3)?,
+                    slow_passage: row.get(4)?,
+                    passage_check: row.get(5)?,
+                    time_killing: row.get(6)?,
                 })
             });
 
             match x {
                 Ok(rs) => {
-                    let mut z: Vec<VerbalErrors> =
-                        rs.into_iter().collect::<Result<Vec<VerbalErrors>, _>>()?;
+                    let mut z: Vec<VerbalError> =
+                        rs.into_iter().collect::<Result<Vec<VerbalError>, _>>()?;
 
                     let _ = &z.sort_by(|a, b| a.id.unwrap().cmp(&b.id.unwrap()));
 
@@ -380,6 +425,37 @@ pub fn get_score_one(exam_id: &String) -> Result<Vec<Score>, DBError> {
 
     let scores: Vec<Score> = rows.collect::<Result<Vec<Score>, _>>()?;
     let score_clone = scores.clone();
+    score_clone
+        .into_iter()
+        .for_each(|e| println!("hi----{:?}", e));
+
+    Ok(scores)
+}
+
+
+pub fn get_verbal_error_one(exam_id: &String) -> Result<Vec<VerbalError>, DBError> {
+    let db = DB.lock().unwrap();
+
+    let ch = db.as_ref().unwrap();
+
+    let mut stmt = ch
+        .connection
+        .prepare("SELECT * FROM verbal_error WHERE exam_id= ?1")?;
+
+    let rows = stmt.query_map([exam_id], |row| {
+        Ok(VerbalError {
+            id: row.get(0)?,
+            exam_id: row.get(1)?,
+            not_crossed: row.get(2)?,
+            idea_issue: row.get(3)?,
+            slow_passage: row.get(4)?,
+            passage_check: row.get(5)?,
+            time_killing: row.get(6)?,
+        })
+    })?;
+
+    let scores: Vec<VerbalError> = rows.collect::<Result<Vec<VerbalError>, _>>()?;
+    let score_clone: Vec<VerbalError> = scores.clone();
     score_clone
         .into_iter()
         .for_each(|e| println!("hi----{:?}", e));

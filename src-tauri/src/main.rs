@@ -95,6 +95,7 @@ fn main() -> Result<(), DBError> {
     queries::create_verbal_ana_table();
     queries::create_verbal_error_table();
 
+
     let quant = CustomMenuItem::new("quant".to_string(), "Quant");
     let verbal = CustomMenuItem::new("verbal".to_string(), "Verbal");
     let v_errors = CustomMenuItem::new("v_error".to_string(), "Verbal Errors");
@@ -119,7 +120,13 @@ fn main() -> Result<(), DBError> {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![ui_commands::save_scores, ui_commands::get_scores, ui_commands::get_verbal_anas,ui_commands::get_verbal_errors])
+        .invoke_handler(tauri::generate_handler![
+            ui_commands::save_scores, 
+            ui_commands::get_scores, 
+            ui_commands::get_verbal_anas,
+            ui_commands::get_verbal_errors,
+            ui_commands::insert_or_update_verbal_errors
+            ])
         .on_menu_event(resize_or_close)
         .on_menu_event(open_window)
         .run(tauri::generate_context!())
