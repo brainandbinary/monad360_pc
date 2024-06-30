@@ -1,35 +1,76 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
-    <style>
-      .logo.vanilla:hover {
-        filter: drop-shadow(0 0 2em #ffe21c);
-      }
-    </style>
-  </head>
 
-  <body>
-    <div class="container">
-      <h1>Welcome to Monad360!</h1>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tauri App</title>
+  <script type="module" src="/main.js" defer></script>
+  <style>
+    .logo.vanilla:hover {
+      filter: drop-shadow(0 0 2em #ffe21c);
+    }
 
-      <div class="row">
-        
-          <img src="/assets/tauri.svg" class="logo tauri" alt="Monad360 logo" />
-        
-      </div>
+    .cntr {
+      display: flex;
+      align-items: center;
+      margin-top: 50px;
+      justify-content: center;
+    }
 
-      <p>Start your journy for a better future with Monad360</p>
+    .text {
+      margin-right: 10px;
+    }
 
-      <form class="row" id="greet-form">
-        <button class="btn" type="submit">Go</button>
-      </form>
+    #copy-button {
+      cursor: pointer;
+      padding: 5px 7px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
 
-      <p id="greet-msg"></p>
+<body>
+  <div class="container">
+    <h1>Welcome to Monad360!</h1>
+
+    <div class="row">
+
+      <img src="/assets/tauri.svg" class="logo tauri" alt="Monad360 logo" />
+
     </div>
-  </body>
+
+    <div class="cntr">
+      <b>Your App ID: </b>
+      <span class="text" id="app_id"></span>
+      <button id="copy-button" onclick="copyText()">Copy</button>
+    </div>
+    <p>Start your journey for a better future with Monad360</p>
+
+    <form class="row" id="greet-form">
+      <button class="btn" type="submit">Go</button>
+    </form>
+
+    <p id="location"></p>
+  </div>
+
+</body>
+<script>
+  function copyText() {
+    var textToCopy = document.getElementById("app_id").textContent;
+    var textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+    document.getElementById("copy-button").innerText="Copied";
+  }
+</script>
+
 </html>

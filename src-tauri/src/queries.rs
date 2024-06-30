@@ -58,8 +58,8 @@ pub fn create_verbal_ana_table() {
     );
 
     match res {
-        Ok(_) => println!("verbal_ana Table created successfully"),
-        Err(e) => eprintln!("Error creating table: {}", e),
+        Ok(_) => println!("Step 1 done!"),
+        Err(e) => eprintln!("Error creating table 1: {}", e),
     }
 }
 
@@ -72,8 +72,8 @@ pub fn create_mock_score_table() {
     );
 
     match res {
-        Ok(_) => println!("mock_score Table created successfully"),
-        Err(e) => eprintln!("Error creating table: {}", e),
+        Ok(_) => println!("Step 2 done!"),
+        Err(e) => eprintln!("Error creating table 2: {}", e),
     }
 }
 
@@ -89,8 +89,8 @@ pub fn create_verbal_error_table() {
     
 
     match res {
-        Ok(_) => println!("verbal_error Table created successfully"),
-        Err(e) => eprintln!("Error creating table: {}", e),
+        Ok(_) => println!("Step 3 done!"),
+        Err(e) => eprintln!("Error creating table 3: {}", e),
     }
 }
 
@@ -110,7 +110,7 @@ pub fn insert_score(scr: &Score) -> Result<(), DBError> {
             let mut exam_id_locked = EXAM_ID.lock().unwrap();
             *exam_id_locked = Some(scr.examId.clone());
 
-            println!("mock_score inserted {} row(s)", count)
+           
         }
         Err(e) => eprintln!("Error inserting row: {}", e),
     }
@@ -131,7 +131,7 @@ pub fn insert_verbal_error(scr: &VerbalError) -> Result<(), DBError> {
     match res {
         Ok(count) => {
         
-            println!("verbal_error inserted {} row(s)", count)
+            
         }
         Err(e) => eprintln!("Error inserting row: {}", e),
     }
@@ -150,7 +150,7 @@ pub fn insert_verbal_ana(scr: &VerbalAna) -> Result<(), DBError> {
     );
 
     match res {
-        Ok(count) => println!("verbal_ana inserted {} row(s)", count),
+        Ok(count) => {},
         Err(e) => eprintln!("Error inserting row: {}", e),
     }
 
@@ -171,7 +171,7 @@ pub fn update_score(score: &i32, exam_id: &String) -> Result<(), DBError> {
             *exam_id_locked = Some(exam_id.clone());
 
     match res {
-        Ok(count) => println!("mock_score total Updated {}", count),
+        Ok(count) => {},
         Err(e) => eprintln!("Error inserting row: {}", e),
     }
 
@@ -189,7 +189,7 @@ pub fn update_verbal_ana(scr: &VerbalAna) -> Result<(), DBError> {
     );
 
     match res {
-        Ok(count) => println!("Verbal ana total Updated {}", count),
+        Ok(count) => {},
         Err(e) => eprintln!("Error inserting row: {}", e),
     }
 
@@ -207,7 +207,7 @@ pub fn update_verbal_error(scr: &VerbalError) -> Result<(), DBError> {
     );
 
     match res {
-        Ok(count) => println!("Verbal error total Updated {}", count),
+        Ok(count) => {},
         Err(e) => eprintln!("Error inserting row: {}", e),
     }
 
@@ -244,7 +244,7 @@ pub fn get_scores(is_verbal: bool) -> Result<Vec<(i32, i32)>, DBError> {
                     let z: Vec<(i32, i32)> = rs
                         .into_iter()
                         .map(move |e| {
-                            println!("{:?}", e);
+                            
 
                             let score = e.as_ref().unwrap();
                             (score.id.unwrap(), score.clone().score)
@@ -334,7 +334,7 @@ pub fn get_scores_structs() -> Result<Vec<Score>, DBError> {
                     let z: Vec<Score> = rs
                         .into_iter()
                         .map(move |e| {
-                            println!("{:?}", e);
+                            
 
                             e.unwrap()
                         })
@@ -424,11 +424,7 @@ pub fn get_score_one(exam_id: &String) -> Result<Vec<Score>, DBError> {
     })?;
 
     let scores: Vec<Score> = rows.collect::<Result<Vec<Score>, _>>()?;
-    let score_clone = scores.clone();
-    score_clone
-        .into_iter()
-        .for_each(|e| println!("hi----{:?}", e));
-
+   
     Ok(scores)
 }
 
@@ -456,9 +452,6 @@ pub fn get_verbal_error_one(exam_id: &String) -> Result<Vec<VerbalError>, DBErro
 
     let scores: Vec<VerbalError> = rows.collect::<Result<Vec<VerbalError>, _>>()?;
     let score_clone: Vec<VerbalError> = scores.clone();
-    score_clone
-        .into_iter()
-        .for_each(|e| println!("hi----{:?}", e));
-
+    
     Ok(scores)
 }

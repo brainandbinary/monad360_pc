@@ -15,4 +15,18 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+async function app_id(){
+  var res =  await invoke("app_id", {});
+  document.querySelector("#app_id").innerHTML=btoa(res+'=monad360');
+}
+
+app_id();
+
+
+
+
+
+ 
+
+
 //document.addEventListener('contextmenu', event => event.preventDefault());

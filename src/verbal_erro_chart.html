@@ -6,11 +6,25 @@
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
     <style>
-        .logo.vanilla:hover {
-            filter: drop-shadow(0 0 2em #ffe21c);
+        
+        .ctr {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
         }
+        .ctr div {
+            display: flex;
+            flex-direction: column;
+        }
+        .ctr label {
+            font-size: 10px;
+        }
+        .ctr input[type="number"] {
+            margin-bottom: 10px;
+            width: 130px;
+        }
+        
     </style>
 </head>
 
@@ -35,20 +49,46 @@
             <canvas id="myChart"></canvas>
         </div>
 
-        <div id="entry">
-            <div>
-                <label style="font-size: 10px;" for="nuc">Not use crossing:</label><br>
-                <input type="number" id="nuc" name="nuc" value=0><br>
-                <label style="font-size: 10px;" for="ii">Idea issue:</label><br>
-                <input type="number" id="ii" name="ii" value=0><br>
-                <label style="font-size: 10px;" for="spr">Slow passage read:</label><br>
-                <input type="number" id="spr" name="spr" value=0><br>
-                <label style="font-size: 10px;" for="ppnc">Passage option not cross-checked:</label><br>
-                <input type="number" id="ppnc" name="ppnc" value=0><br>
-                 <label style="font-size: 10px;" for="tkq">Time killing on a question:</label><br>
-                <input type="number" id="tkq" name="tkq" value=0><br>
-                <button id="enter">Enter</button>
+        <div id="entry" style="width: 400px; margin: auto;">
+            <div class="ctr">
+                <div>
+                    <label for="nuc">Not use crossing:</label>
+                    <input type="number" id="nuc" name="nuc" value="0">
+                </div>
+                <div>
+                    <label for="ii">Clue issue:</label>
+                    <input type="number" id="ii" name="ii" value="0">
+                </div>
+                <div>
+                    <label for="nrpw">Not read passage well:</label>
+                    <input type="number" id="nrpw" name="nrpw" value="0">
+                </div>
+                <div>
+                    <label for="spr">Slow passage read:</label>
+                    <input type="number" id="spr" name="spr" value="0">
+                </div>
+                <div>
+                    <label for="ppnc">Passage option not cross-checked:</label>
+                    <input type="number" id="ppnc" name="ppnc" value="0">
+                </div>
+                <div>
+                    <label for="tkq">Time killing on a question:</label>
+                    <input type="number" id="tkq" name="tkq" value="0">
+                </div>
+                <div>
+                    <label for="fwm">Word meaning problem in options:</label>
+                    <input type="number" id="fwm" name="fwm" value="0">
+                </div>
+                <div>
+                    <label for="aos">Answered out of the sentence:</label>
+                    <input type="number" id="aos" name="aos" value="0">
+                </div>
+                <div>
+                    <label for="naq">Not answered:</label>
+                    <input type="number" id="naq" name="naq" value="0">
+                </div>
             </div>
+            <button id="enter">Enter</button>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -64,14 +104,14 @@
                 return await invoke("insert_or_update_verbal_errors", { verbalError: obj });
             }
 
-        
+
 
 
             const ctx = document.getElementById('myChart');
 
             let charObj = null;
 
-            let exam_id=null;
+            let exam_id = null;
 
 
             function makeChart(type, data, Yscale) {
@@ -115,8 +155,8 @@
             /* over all func */
             function overall() {
                 activateTab('ol');
-                document.getElementById('myChart').style.display="block";
-                document.getElementById('entry').style.display="none";
+                document.getElementById('myChart').style.display = "block";
+                document.getElementById('entry').style.display = "none";
 
                 get_errors().then(function (e) {
 
@@ -126,31 +166,41 @@
 
                     }
 
-                    let not_crossed = e[0].reduce((acc, ele)=> {return ele.not_crossed+acc},0)
-                    let idea_issue = e[0].reduce((acc, ele)=> {return ele.idea_issue+acc},0)
-                    let slow_passage = e[0].reduce((acc, ele)=> {return ele.slow_passage+acc},0)
-                    let passage_check = e[0].reduce((acc, ele)=> {return ele.passage_check+acc},0)
-                    let time_killing = e[0].reduce((acc, ele)=> {return ele.time_killing+acc},0)
-                   
+                    let not_crossed = e[0].reduce((acc, ele) => { return ele.not_crossed + acc }, 0)
+                    let idea_issue = e[0].reduce((acc, ele) => { return ele.idea_issue + acc }, 0)
+                    let slow_passage = e[0].reduce((acc, ele) => { return ele.slow_passage + acc }, 0)
+                    let passage_check = e[0].reduce((acc, ele) => { return ele.passage_check + acc }, 0)
+                    let time_killing = e[0].reduce((acc, ele) => { return ele.time_killing + acc }, 0)
+
                     console.log(e);
-                    
+
                     const data = {
                         labels: [
                             'Not use crossing',
-                            'Idea issue',
+                            'Clue issue',
+                            'Not read passage well',
                             'Slow passage read',
                             'Passage option not cross-checked',
                             'Time killing on a question',
+                            'Forgetting word meaning',
+                            'Answered out of the sentnece',
+                            'Not answered'
                         ],
                         datasets: [{
                             label: 'Verbal errors',
-                            data: [not_crossed, idea_issue, slow_passage, passage_check, time_killing],
+                            /*   data: [not_crossed, idea_issue, slow_passage, passage_check, time_killing], */
+                            data: [20, 20, 20, 20, 20, 20, 20, 20, 20],
                             backgroundColor: [
-                                'rgb(255, 99, 132)',
-                                'rgb(54, 162, 235)',
-                                'rgb(162, 205, 54)',
-                                'rgb(132, 205, 86)',
-                                'rgb(54, 99, 86)',
+                                "rgb(255, 99, 132)",
+                                "rgb(54, 162, 235)",
+                                "rgb(255, 206, 86)",
+                                "rgb(75, 192, 192)",
+                                "rgb(153, 102, 255)",
+                                "rgb(255, 159, 64)",
+                                "rgb(199, 199, 199)",
+                                "rgb(83, 102, 255)",
+                                "rgb(255, 99, 71)"
+
                             ],
                             hoverOffset: 4
                         }]
@@ -188,45 +238,45 @@
 
             /* form */
             document.getElementById('enter').addEventListener("click", function () {
-                if(exam_id!==null){
+                if (exam_id !== null) {
                     let not_cross = Math.abs(parseInt(document.getElementById('nuc').value));
                     let idea_issue = Math.abs(parseInt(document.getElementById('ii').value));
-                    let slow_passage= Math.abs(parseInt(document.getElementById('spr').value));
-                    let passage_option_check= Math.abs(parseInt(document.getElementById('ppnc').value));
+                    let slow_passage = Math.abs(parseInt(document.getElementById('spr').value));
+                    let passage_option_check = Math.abs(parseInt(document.getElementById('ppnc').value));
                     let over_time = Math.abs(parseInt(document.getElementById('tkq').value));
 
-                    let error_obj={
+                    let error_obj = {
                         exam_id: exam_id,
-                        not_crossed:not_cross,
-                        idea_issue:idea_issue,
-                        slow_passage:slow_passage,
-                        passage_check:passage_option_check,
-                        time_killing:over_time
+                        not_crossed: not_cross,
+                        idea_issue: idea_issue,
+                        slow_passage: slow_passage,
+                        passage_check: passage_option_check,
+                        time_killing: over_time
                     };
 
                     console.log(error_obj)
 
-                    insert_or_update_verbal_errors(error_obj).then(function(e){
-                        if(e=="200"){
+                    insert_or_update_verbal_errors(error_obj).then(function (e) {
+                        if (e == "200") {
                             console.log("Inserted or updated");
-                            document.getElementById("entry").innerHTML="Done!!";
+                            document.getElementById("entry").innerHTML = "Done!!";
                         }
                     })
 
                 }
-              
-                
 
-               
+
+
+
 
             });
 
             document.getElementById('ent').addEventListener("click", function () {
                 activateTab('ent');
                 re_build_radio();
-                document.getElementById('myChart').style.display="none";
-                if(exam_id!==null){
-                    document.getElementById('entry').style.display="block";
+                document.getElementById('myChart').style.display = "none";
+                if (exam_id !== null) {
+                    document.getElementById('entry').style.display = "block";
                 }
 
 

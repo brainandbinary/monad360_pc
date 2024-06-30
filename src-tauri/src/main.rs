@@ -1,18 +1,15 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::Mutex;
-use std::thread;
 
-use queries::Score;
-use rusqlite::Connection;
 use tauri::{ipc::RemoteDomainAccessScope, Manager};
-use tauri::{CustomMenuItem, Menu, MenuEvent, MenuItem, Submenu, WindowUrl};
+use tauri::{CustomMenuItem, Menu, Submenu};
 
+pub mod host;
 pub mod db;
 pub mod queries;
 mod ui_commands;
-use db::{DBError, Database, DB};
+use db::{DBError};
 use uuid::Uuid;
 
 fn open_window(event: tauri::WindowMenuEvent) {
@@ -52,7 +49,7 @@ fn open_window(event: tauri::WindowMenuEvent) {
             .unwrap();
         },
 
-        _  => {
+        "v_error"  => {
             let app_handle = event.window().app_handle();
 
             tauri::WindowBuilder::new(
@@ -67,6 +64,7 @@ fn open_window(event: tauri::WindowMenuEvent) {
             .build()
             .unwrap();
         }
+        _ => {}
     }
 }
 
@@ -76,21 +74,29 @@ fn resize_or_close(event: tauri::WindowMenuEvent) {
         "close" => {
             event.window().close().unwrap();
         }
-        "mini_maximize" => {
+        "screen" => {
             
-            match event.window().is_fullscreen() {
-                Err(_) => {},
-                Ok(_) => {
-                    event.window().set_fullscreen(false).unwrap();
-                }
+        
+           
+            if event.window().is_fullscreen().unwrap_or(false) {
+                event.window().set_fullscreen(false).unwrap();
+                
+            } else {
+                event.window().set_fullscreen(true).unwrap();
+                
             }
+                
         }
+        
         _ => {}
     }
 }
 
 
 fn main() -> Result<(), DBError> {
+
+    
+
     queries::create_mock_score_table();
     queries::create_verbal_ana_table();
     queries::create_verbal_error_table();
@@ -102,9 +108,10 @@ fn main() -> Result<(), DBError> {
     let analysis = Submenu::new("Analysis", Menu::new().add_item(quant).add_item(verbal).add_item(v_errors));
    
    
-    let mini_maximize = CustomMenuItem::new("mini_maximize".to_string(), "Normal screen");
+    let screen = CustomMenuItem::new("screen".to_string(), "Toggle screen");
+    
     let close = CustomMenuItem::new("close".to_string(), "Close");
-    let app_manu = Submenu::new("App", Menu::new().add_item(mini_maximize).add_item(close));
+    let app_manu = Submenu::new("App", Menu::new().add_item(screen).add_item(close));
 
     let menu = Menu::new().add_submenu(analysis)
     .add_submenu(app_manu);
@@ -121,11 +128,13 @@ fn main() -> Result<(), DBError> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            ui_commands::app_id, 
             ui_commands::save_scores, 
             ui_commands::get_scores, 
             ui_commands::get_verbal_anas,
             ui_commands::get_verbal_errors,
-            ui_commands::insert_or_update_verbal_errors
+            ui_commands::insert_or_update_verbal_errors,
+            ui_commands::set_fullscreen,
             ])
         .on_menu_event(resize_or_close)
         .on_menu_event(open_window)
@@ -134,3 +143,6 @@ fn main() -> Result<(), DBError> {
 
     Ok(())
 }
+
+
+

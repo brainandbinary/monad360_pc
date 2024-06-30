@@ -1,4 +1,5 @@
 use crate::db::DBError;
+use crate::host;
 use crate::queries::{self, QuantAna, Score, VerbalAna, VerbalError};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -109,4 +110,22 @@ fn insert_or_update_verbal_errors_result(verbal_error: &VerbalError) -> Result<S
             Ok(_) => Ok("200".to_string()),
         }
     }
+}
+
+
+#[tauri::command]
+pub fn app_id() -> Result<String, String> {
+    let res = host::get_mac_address();
+
+    match res {
+        None => Err("xxxxxxxxxxxxxxxxx".to_string()),
+        Some(r) => Ok(r),
+    }
+}
+
+
+#[tauri::command]
+pub async fn set_fullscreen(window: tauri::Window) {
+    if !window.is_fullscreen().unwrap_or(false) { window.set_fullscreen(true).expect("Failed to set fullscreen");}
+   
 }
