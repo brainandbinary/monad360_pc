@@ -29,4 +29,3 @@ app_id();
  
 
 
-//document.addEventListener('contextmenu', event => event.preventDefault());

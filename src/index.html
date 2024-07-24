@@ -2,75 +2,186 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <link rel="stylesheet" href="styles.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tauri App</title>
-  <script type="module" src="/main.js" defer></script>
-  <style>
-    .logo.vanilla:hover {
-      filter: drop-shadow(0 0 2em #ffe21c);
-    }
+    <meta charset="UTF-8" />
+    <!--   <link rel="stylesheet" href="styles.css" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monad 360</title>
+    <script type="module" src="/common.js" defer></script>
+    <script type="module" src="/index.js" defer></script>
+    <style>
+        :root {
+            font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 24px;
+            font-weight: 400;
+            color: white;
+            font-synthesis: none;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-text-size-adjust: 100%;
+            margin: 0px;
 
-    .cntr {
-      display: flex;
-      align-items: center;
-      margin-top: 50px;
-      justify-content: center;
-    }
+        }
 
-    .text {
-      margin-right: 10px;
-    }
+        .column-container {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
 
-    #copy-button {
-      cursor: pointer;
-      padding: 5px 7px;
-      border: none;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
-      border-radius: 5px;
-    }
-  </style>
+        .logo {
+            height: 6em;
+            padding: 1.5em;
+            will-change: filter;
+            transition: 0.75s;
+        }
+
+        .logo.tauri:hover {
+            filter: drop-shadow(0 0 2em #24c8db);
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+        }
+
+        a {
+            font-weight: 500;
+            color: #646cff;
+            text-decoration: inherit;
+        }
+
+        a:hover {
+            color: #535bf2;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .btn {
+            border-radius: 8px;
+            border: 1px solid transparent;
+            padding: 0.6em 1.2em;
+            font-size: 1em;
+            font-weight: 500;
+            font-family: inherit;
+            color: #ffffff;
+            background-color: #0f0f0f98;
+            transition: border-color 0.25s;
+            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:hover {
+            border-color: #396cd8;
+        }
+
+        button:active {
+            border-color: #396cd8;
+        }
+
+        input,
+        button {
+            outline: none;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            margin: 0px;
+        }
+
+        .column {
+            flex: 1;
+            padding: 10px;
+            
+        }
+
+        .column-left {
+            background-color: white;
+        }
+
+        .column-right {
+            background-color: rgb(13, 110, 253);
+        }
+
+        .cont-center-vcl {
+            display: flex;
+            /* Enable flexbox */
+            justify-content: center;
+            /* Center elements horizontally */
+            align-items: center;
+            
+        }
+
+        .logo.vanilla:hover {
+            filter: drop-shadow(0 0 2em #ffe21c);
+        }
+
+        .cntr {
+           
+        }
+
+        .text {
+            margin-right: 10px;
+        }
+
+        #copy-button {
+            cursor: pointer;
+            padding: 5px 7px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 
-<body>
-  <div class="container">
-    <h1>Welcome to Monad360!</h1>
+<body style="background-color: rgb(34, 34, 34); margin: 0px;">
 
-    <div class="row">
+    <div class="container">
+        <div class="column column-left cont-center-vcl">
+            <img style="width: 100%;" src="assets/undraw_reading_time_re_phf7.svg" alt="a styding girl's image">
+        </div>
+        <div class="column column-right cont-center-vcl">
+           
+            <div class="column-container">
 
-      <img src="/assets/tauri.svg" class="logo tauri" alt="Monad360 logo" />
 
+                <div class="row">
+
+                    <img src="/assets/logo.svg" class="logo tauri" alt="Monad360 logo" />
+
+                </div>
+                <h3>Welcome to Monad 360</h3>
+
+                
+                <p>Start your journey for a better future with Monad360</p>
+
+                <form class="row" id="greet-form">
+                    <button class="btn" type="submit">Go</button>
+                </form>
+
+
+            </div>
+
+        </div>
     </div>
 
-    <div class="cntr">
-      <b>Your App ID: </b>
-      <span class="text" id="app_id"></span>
-      <button id="copy-button" onclick="copyText()">Copy</button>
-    </div>
-    <p>Start your journey for a better future with Monad360</p>
-
-    <form class="row" id="greet-form">
-      <button class="btn" type="submit">Go</button>
-    </form>
-
-    <p id="location"></p>
-  </div>
 
 </body>
-<script>
-  function copyText() {
-    var textToCopy = document.getElementById("app_id").textContent;
-    var textArea = document.createElement("textarea");
-    textArea.value = textToCopy;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-    document.getElementById("copy-button").innerText="Copied";
-  }
-</script>
+
+
+
+
 
 </html>

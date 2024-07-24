@@ -133,7 +133,7 @@
                     console.log(ln)
                     console.log(dt.reduce((accumulator, currentValue) => accumulator + currentValue))
                     var avr = dt.reduce((accumulator, currentValue) => accumulator + currentValue) / ln;
-                    avarageScore(avr);
+                    avarageScore(parseInt(avr));
                     makeChart("line", data, Yscale);
 
                 });

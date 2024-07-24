@@ -64,6 +64,20 @@ fn open_window(event: tauri::WindowMenuEvent) {
             .build()
             .unwrap();
         }
+
+        "app_id"  => {
+            let app_handle = event.window().app_handle();
+
+            tauri::WindowBuilder::new(
+                &app_handle,
+                &UUID, /* the unique window label */
+                tauri::WindowUrl::App("app_id.html".into()),
+            )
+            .menu(Menu::new())
+            .title("App Id")
+            .build()
+            .unwrap();
+        }
         _ => {}
     }
 }
@@ -105,16 +119,18 @@ fn main() -> Result<(), DBError> {
     let quant = CustomMenuItem::new("quant".to_string(), "Quant");
     let verbal = CustomMenuItem::new("verbal".to_string(), "Verbal");
     let v_errors = CustomMenuItem::new("v_error".to_string(), "Verbal Errors");
-    let analysis = Submenu::new("Analysis", Menu::new().add_item(quant).add_item(verbal).add_item(v_errors));
+    let gre = Submenu::new("GRE", Menu::new().add_item(quant).add_item(verbal).add_item(v_errors));
    
    
     let screen = CustomMenuItem::new("screen".to_string(), "Toggle screen");
+    let app_id: CustomMenuItem = CustomMenuItem::new("app_id".to_string(), "App Id");
     
     let close = CustomMenuItem::new("close".to_string(), "Close");
-    let app_manu = Submenu::new("App", Menu::new().add_item(screen).add_item(close));
+    
+    let app_manu = Submenu::new("App", Menu::new().add_item(screen).add_item(app_id).add_item(close));
 
-    let menu = Menu::new().add_submenu(analysis)
-    .add_submenu(app_manu);
+    let menu = Menu::new()
+    .add_submenu(app_manu).add_submenu(gre);
 
     tauri::Builder::default()
         .menu(menu)
