@@ -57,7 +57,7 @@ impl Database {
 
 
 lazy_static! {
-    pub static ref DB: Mutex<Result<Database,DBError>> = Mutex::new(Database::new("/home/johnny/Desktop/db_1.db3"));
+    pub static ref DB: Mutex<Result<Database,DBError>> = Mutex::new(Database::new("/home/johnny/Desktop/db.db3"));
    
 }
 
