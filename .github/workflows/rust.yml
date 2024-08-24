@@ -67,6 +67,6 @@ jobs:
         with:
           name: app-build-${{ matrix.platform }}
           path: |
-            src-tauri/target/release/your-app-name.exe
-            src-tauri/target/release/your-app-name.dmg
-            src-tauri/target/release/your-app-name.AppImage
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/appimage/*.AppImage
