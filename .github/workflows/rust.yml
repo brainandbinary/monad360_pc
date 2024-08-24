@@ -26,31 +26,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
-      - name: install Rust stable
+      - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: install dependencies (ubuntu only)
+      - name: Install dependencies (Ubuntu only)
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: install windows dependencies (manual)
+      - name: Install Windows dependencies (WinPcap)
         if: matrix.platform == 'windows-latest'
         run: |
-          # Example of directly downloading a dependency
-          # Replace the URL and installation commands with those relevant to your needs
           curl -L -o winpcap.exe https://www.winpcap.org/install/bin/WinPcap_4_1_3.exe
-          start /wait winpcap.exe /S
+          Start-Process -FilePath .\winpcap.exe -ArgumentList '/S' -NoNewWindow -Wait
 
-      - name: install frontend dependencies
+      - name: Install frontend dependencies
         run: yarn install
 
       - uses: tauri-apps/tauri-action@v0
